@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {PrismaClient} from '@prisma/client';
 import { z } from 'zod';
+import checkAuth from "@/app/api/auth/check-auth";
 
 const prisma = new PrismaClient();
 
@@ -10,14 +11,24 @@ const taskValidator = z.object({
 });
 
 export async function PUT(req: NextRequest) {
+
+    let userId:string;
+    try{
+        userId = await checkAuth(req.cookies.get("user")?.value);
+    } catch (error){
+        if (error instanceof Error) {
+            return NextResponse.json({message: error.message}, {status: 401});
+        }
+        return NextResponse.json({message: "Not authenticated"}, {status: 401});
+    }
+
     try {
         const id = req.nextUrl.pathname.split('/').pop()!;
         const { completed } = await req.json();
 
         const currentTask: {userId: string} | null = await prisma.task.findUnique({where: {id: id}, select: { userId: true }});
 
-        const userCookie = req.cookies.get("user")?.value;
-        if (currentTask && userCookie !== currentTask.userId) {
+        if (currentTask && userId !== currentTask.userId) {
             return NextResponse.json({message: "Unauthorized"}, {status: 401});
         }
 
@@ -36,7 +47,7 @@ export async function PUT(req: NextRequest) {
             },
         });
 
-        return NextResponse.json({task: updatedTask, status: 200 });
+        return NextResponse.json({task: updatedTask}, {status: 200 });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ message: "Error while updating task" }, { status: 500 });
@@ -44,6 +55,16 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+    let userId:string;
+    try{
+        userId = await checkAuth(req.cookies.get("user")?.value);
+    } catch (error){
+        if (error instanceof Error) {
+            return NextResponse.json({message: error.message}, {status: 401});
+        }
+        return NextResponse.json({message: "Not authenticated"}, {status: 401});
+    }
+
     const id = req.nextUrl.pathname.split('/').pop()!;
 
     if (!id) {
@@ -52,8 +73,7 @@ export async function DELETE(req: NextRequest) {
 
     const currentTask: {userId: string} | null = await prisma.task.findUnique({where: {id: id}, select: { userId: true }});
 
-    const userCookie = req.cookies.get("user")?.value;
-    if (currentTask && userCookie !== currentTask.userId) {
+    if (currentTask && userId !== currentTask.userId) {
         return NextResponse.json({message: "Unauthorized"}, {status: 401});
     }
 

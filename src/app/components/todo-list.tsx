@@ -1,5 +1,5 @@
 'use client'
-
+import {useRouter} from "next/navigation";
 import {useState, useEffect} from "react";
 
 interface Todo {
@@ -12,6 +12,7 @@ export default function TodoList({userId}: { userId: string }) {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [input, setInput] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
+    const router = useRouter();
 
     useEffect(() => {
         const fetchTodos = async () => {
@@ -47,18 +48,21 @@ export default function TodoList({userId}: { userId: string }) {
                     credentials: "include",
                     body: JSON.stringify(newTodo),
                 });
+                const status = response.status;
 
-                const {content, status} = await response.json();
-
+                const content = await response.json();
+                const newTask = content.message;
 
                 if (status === 201) {
                     setTodos((prevTodos) => {
-                        return [...prevTodos, content];
+                        return [...prevTodos, newTask];
                     });
 
-                } else {
-                    console.log("contettttt: ", content);
-                    setErrorMessage(content);
+                } else if(response.status === 401){
+                    router.push('/');
+                }else {
+                    console.log("contettttt: ", newTask);
+                    setErrorMessage(newTask);
                 }
 
                 setInput("");
@@ -92,6 +96,8 @@ export default function TodoList({userId}: { userId: string }) {
                         todo.id === id ? updatedTask : todo
                     )
                 );
+            } else if(response.status === 401){
+                router.push('/');
             } else {
                 console.error("Failed to update task");
             }
@@ -108,10 +114,12 @@ export default function TodoList({userId}: { userId: string }) {
 
         if (response.status === 204) {
             setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-        } else {
+        } else if( response.status === 401){
+            router.push('/');
+        }
+        else {
             console.error("Failed to delete task");
         }
-
     };
 
     return (

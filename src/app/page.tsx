@@ -9,10 +9,6 @@ function Snowfall() {
 
     useEffect(() => {
         setFlakes(new Array(50).fill(0).map((_, i) => i));
-        const isAuthenticated = localStorage.getItem("isAuthenticated");
-        if (isAuthenticated === "true") {
-            router.push("/hidden");
-        }
     }, [router]);
 
     return (
@@ -41,8 +37,8 @@ export default function Page() {
         <div
             className="flex flex-col items-center justify-center min-h-screen text-center relative bg-blue-900 text-white">
             <Snowfall/>
-            <p>Welcome to the TP1 home page</p>
-            <p>Click here to Sign in</p>
+            <h2>Welcome to SnowDo</h2>
+            <p>The best to-do app when it snows outside</p>
             <button
                 className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                 type="button"

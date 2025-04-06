@@ -14,12 +14,20 @@ model User {
   name      String
   createdAt DateTime @default(now())
   tasks     Task[]
+  Sessions  Session[]
 }
 
 model Task {
   id        String   @id @default(uuid())
   content   String
   completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  token String @id @default(uuid())
   createdAt DateTime @default(now())
   userId    String
   user      User     @relation(fields: [userId], references: [id])

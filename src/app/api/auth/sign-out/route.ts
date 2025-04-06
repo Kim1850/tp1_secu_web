@@ -1,7 +1,17 @@
-import { NextResponse } from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
+import {PrismaClient} from "@prisma/client";
 
-export async function POST() {
-    const response = NextResponse.json({ message: 'Sign out successful', status: 200 });
+const prisma = new PrismaClient();
+export async function POST(req: NextRequest) {
+
+    const sessionToken = req.cookies.get("user")?.value;
+    prisma.session.delete({
+        where:{
+            token:sessionToken,
+        }
+    }).catch(()=>{});
+
+    const response = NextResponse.json({ message: 'Sign out successful'});
 
     response.cookies.set('user', '', {
         httpOnly: true,

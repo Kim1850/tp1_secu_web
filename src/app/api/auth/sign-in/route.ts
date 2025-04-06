@@ -30,9 +30,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'Email or password invalid', user}, {status: 401 });
     }
 
-    const response = NextResponse.json({ message: 'Connection successful', user, status: 200 });
+    const response = NextResponse.json({ message: 'Connection successful', user});
 
-    response.cookies.set('user', user.id, {
+    const sessionToken = await createSession(user.id);
+
+    response.cookies.set('user', sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
@@ -41,4 +43,14 @@ export async function POST(req: NextRequest) {
     });
 
     return response;
+}
+
+async function createSession(userId: string): Promise<string> {
+    const session = await prisma.session.create({
+        data:{
+            userId: userId
+        }
+    });
+
+    return session.token;
 }

@@ -32,8 +32,9 @@ export default function SignUp() {
             });
 
             const data = await response.json();
+            const status = response.status;
 
-            if (data.status === 201) {
+            if (status === 201) {
                 alert("Sign up successfully");
                 router.push("/sign-in");
             } else {

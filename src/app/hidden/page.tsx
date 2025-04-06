@@ -3,6 +3,7 @@
 import React, {useEffect, useState} from "react";
 import TodoList from "@/app/components/todo-list";
 import Navbar from "@/app/components/navbar";
+import { useRouter} from "next/navigation";
 
 interface user {
     id: string;
@@ -13,6 +14,7 @@ interface user {
 export default function Hidden() {
     const [user, setUser] = useState<user | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -22,7 +24,7 @@ export default function Hidden() {
                     const data = await response.json();
                     setUser(data.user);
                 } else {
-                    console.error("Could not find user");
+                    router.push("/");
                 }
             } catch (error) {
                 console.error("Query error : ", error);
@@ -32,14 +34,12 @@ export default function Hidden() {
         }
 
         fetchUserData();
-    }, []);
+    }, [router]);
 
     const handleSignOut = async () => {
         const response = await fetch("/api/auth/sign-out", {method: "POST"});
         if (response.status === 200) {
-            localStorage.removeItem("isAuthenticated");
-            localStorage.removeItem("todos");
-            window.location.reload();
+            router.push("/");
         }
     };
 

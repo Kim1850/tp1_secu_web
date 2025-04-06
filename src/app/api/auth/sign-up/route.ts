@@ -51,5 +51,5 @@ export async function POST(req: NextRequest) {
         data: { name, email, password: hashedPassword },
     });
 
-    return NextResponse.json({ message: 'User created', user, status: 201 });
+    return NextResponse.json({ message: 'User created', user}, {status: 201});
 }

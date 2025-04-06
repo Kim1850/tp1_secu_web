@@ -27,9 +27,9 @@ export default function SignIn() {
             });
 
             const data = await response.json();
+            const status = response.status;
 
-            if (data.status === 200) {
-                localStorage.setItem("isAuthenticated", "true");
+            if (status === 200) {
                 router.push("/hidden");
             } else {
                 setError(data.message)
